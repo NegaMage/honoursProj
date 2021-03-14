@@ -1,0 +1,16 @@
+{% extends "hospital/base.html" %}
+
+{% block content %}
+    <h1>Home page</h1>
+
+    {% for obj in objs %}
+        <p>{{obj.hospital}}</p>
+        <p>{{obj.user.username}}</p>
+        <br><br>
+    {% endfor %}
+{% endblock content %}
+
+
+
+
+
