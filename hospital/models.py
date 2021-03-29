@@ -25,7 +25,10 @@ class hosp_inv(models.Model):
     hosp_name = models.CharField(choices=hospital_names, max_length=10)
 
     def __str__(self):
-        return self.itemname
+        return "{}, {}, {}".format(self.itemname, self.hosp_name, self.quantity)
+
+    class Meta:
+        unique_together = ("itemname", "hosp_name")
 
 class hosp_req(models.Model):
     """ Used in day-to-day of hospital. Managers keep track of what
@@ -36,7 +39,10 @@ class hosp_req(models.Model):
     date = models.DateField(verbose_name="Date of change")
 
     def __str__(self):
-        return self.itemname
+        return "{}, {}, {}".format(self.itemname, self.hosp_name, self.quantity)
+
+    class Meta:
+        unique_together = ("itemname", "hosp_name", "date")
 
 class hosp_est(models.Model):
     """ Analytics table, keeps track of what has been consumed in what month."""
@@ -54,9 +60,6 @@ class hosp_est(models.Model):
             raise ValidationError(gettext_lazy("Net inventory is negative after operation."))
         
 
-class hosp_emp(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    hospital = models.CharField(choices=hospital_names, max_length=10, default="A")
-
-    def __str__(self):
-        return self.user.username
+# class hosp_emp(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE)
+#     hospital = models.CharField(choices=hospital_names, max_length=10, default="A")

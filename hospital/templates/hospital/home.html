@@ -4,8 +4,8 @@
     <h1>Home page</h1>
 
     {% for obj in objs %}
-        <p>{{obj.hospital}}</p>
-        <p>{{obj.user.username}}</p>
+        <p>{{obj.itemname}}</p>
+        <p>{{obj.hosp_name}}</p>
         <br><br>
     {% endfor %}
 {% endblock content %}
