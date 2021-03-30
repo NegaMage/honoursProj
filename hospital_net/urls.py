@@ -21,9 +21,24 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # path('logout', views.logout_request, name="logout"),
     path('', views.homepage),
-    path('addhospinv', views.fill_hosp_inv),
+
+
     path('cleanhospinv', views.clean_hosp_inv),
     path('fillhospinv', views.fill_hosp_inv),
+
+
     path('metric_01/<hospital>/', views.metric_01_viewpage),
     path('metric_01/', views.metric_01_viewpage),
+
+    path('metric_02/<hospital>/', views.metric_02_viewpage),
+    path('metric_02/', views.metric_02_viewpage),
+
+    path('fillsuppinv', views.fill_supp_inv),
+    path('resetsuppstorage', views.reset_supp_storage),
+
+    path('metric_03/<supplier>/', views.metric_03_viewpage),
+    path('metric_03/', views.metric_03_viewpage),
+
+    path('metric_04/<supplier>/', views.metric_04_viewpage),
+    path('metric_04/', views.metric_04_viewpage),
 ]

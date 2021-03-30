@@ -15,6 +15,9 @@ hospital_names = [
     ('E', 'E'),
     ('F', 'F'),
     ('G', 'G'),
+    ('H', 'H'),
+    ('I', 'I'),
+    ('J', 'J'),
 ]
 
 class hosp_inv(models.Model):
@@ -44,22 +47,42 @@ class hosp_req(models.Model):
     class Meta:
         unique_together = ("itemname", "hosp_name", "date")
 
-class hosp_est(models.Model):
-    """ Analytics table, keeps track of what has been consumed in what month."""
-    itemname = models.CharField(max_length=200)
-    quantity = models.IntegerField()
-    hosp_name = models.CharField(choices=hospital_names, max_length=10)
-    date = models.DateField(verbose_name="Date of record")
+
+supplier_names = [
+    ('A', 'A'),
+    ('B', 'B'),
+    ('E', 'E'),
+]
+
+class supp_storage(models.Model):
+    """ Keep a record of inventory space of each supplier. This data isn't shown outside, but secret to each supplier, and modifiable in the portal. """
+    supp_name = models.CharField(choices=supplier_names, max_length=10, primary_key=True)
+    maximum = models.IntegerField()
+    occupied = models.IntegerField()
+    
 
     def __str__(self):
-        return self.itemname
-
+        return "{}, {}".format(self.supp_name, self.maximum)
+    
     def clean(self):
-        hosp_inv_item = hosp_inv(itemname=self.itemname, hosp_name=self.hosp_name)
-        if(hosp_inv_item.quantity + self.quantity <0):
-            raise ValidationError(gettext_lazy("Net inventory is negative after operation."))
-        
+        if(self.occupied > self.maximum):
+            raise ValidationError(gettext_lazy("Storage can't be more than maximum capacity."))
 
-# class hosp_emp(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     hospital = models.CharField(choices=hospital_names, max_length=10, default="A")
+
+class supp_inv(models.Model):
+    """ The explicit contents of each suppliers' inventory. Total quantity keeps getting updated in the other table. """
+    supp_name = models.CharField(choices=supplier_names, max_length=10)
+    itemname = models.CharField(max_length=200)
+    quantity = models.IntegerField()
+    sold = models.BooleanField(default=False)
+
+    date = models.DateField(verbose_name="Inventory date")
+
+
+    def __str__(self):
+        return "{}, {}".format(self.supp_name, self.itemname)
+    
+    # def delete(self):
+    #     storage = supp_storage.objects.get(supp_name=self.supp_name)
+    #     storage.occuped -= self.quantity
+    #     self.delete()
