@@ -1,0 +1,45 @@
+{% extends "hospital/base.html" %}
+
+{% block content %}
+    <h1 class="display-2">
+        Metric 08: Most Drugs sold at Hospital {{hospital}}, sorted by least production
+    </h1>
+    <h2>
+    This metric is generated at each hospital. We go through their prescriptions, and find the drugs prescribed the least. This information can be used by suppliers to prioritise profits, and by manufacturers when considering effective production strategies.
+    </h2> 
+    <br>
+    <h2>
+    This is an output, generated from our stored tables at Hospital {{hospital}}. This metric requires us to query the neighboring hospitals, to develop an idea of which hospitals are prescribing which drugs. No weighing is applied before summing, and the net results will also show which neighbouring hospitals are prescribing a particular drug, along with a count of the total prescriptions.
+    </h2>
+    <br>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Item name</th>
+                <th scope="col">Count</th>
+                <th scope="col">Prescribed at</th>
+                <th scope="col">Incoming stock</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for key,value,hosps,manuf_counts in data %}
+
+            <tr>
+                <td>{{ key }}</td>
+                <td>{{ value }}</td>
+                <td>
+                    {% for hosp in hosps %}
+                        {{hosp}},
+                    {% endfor %}
+                </td>
+                <td>{{ manuf_counts }}</td>
+            </tr>
+        {% endfor %}    
+        </tbody>
+        </table>
+    <hr>
+
+    Total time to execute: {{exectime}} seconds
+    
+{% endblock content %}

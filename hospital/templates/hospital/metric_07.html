@@ -1,0 +1,43 @@
+{% extends "hospital/base.html" %}
+
+{% block content %}
+    <h1 class="display-2">
+        Metric 07: Drugs produced most around manufacturer {{manuf}}
+    </h1>
+    <h2>
+    This metric is generated at each supplier. We measure the neighbouring suppliers, and generate receipts of what drugs they sell and stock. Of all the drugs not sold yet, we generate a count irrespective of how old the stock is. This data can be used by suppliers to find what drugs they should stock up on, without facing much competition. When more suppliers have the same stock, it leads to price competition and there isn't much profit to be made.
+    </h2> 
+    <br>
+    <h2>
+    This is an output, generated from our stored tables at Supplier {{supplier}}. This metric requires us to query the neighboring suppliers, to develop an idea of which suppliers are stocking which drugs. No weighing is applied before summing, and the net results will also show which neighbouring suppliers are prescribing a particular drug, along with a count of the total stock.
+    </h2>
+    <br>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Item name</th>
+                <th scope="col">Count</th>
+                <th scope="col">Sold at</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for key,value,hosps in data %}
+
+            <tr>
+                <td>{{ key }}</td>
+                <td>{{ value }}</td>
+                <td>
+                    {% for hosp in hosps %}
+                        {{hosp}},
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}    
+        </tbody>
+        </table>
+    <hr>
+
+    Total time to execute: {{exectime}} seconds
+    
+{% endblock content %}

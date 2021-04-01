@@ -48,5 +48,11 @@ urlpatterns = [
     path('metric_06/<hospital>/', views.metric_06_viewpage),
     path('metric_06/', views.metric_06_viewpage),
 
-    path('add_manuf_data/', views.add_manuf),
+    path('add_manuf_data/', views.fill_manuf_making),
+
+    path('metric_07/<manuf>/', views.metric_07_viewpage),
+    path('metric_07/', views.metric_07_viewpage),
+
+    path('metric_08/<hospital>/', views.metric_08_viewpage),
+    path('metric_08/', views.metric_08_viewpage),
 ]

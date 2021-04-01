@@ -75,7 +75,7 @@ class supp_inv(models.Model):
     itemname = models.CharField(max_length=200)
     quantity = models.IntegerField()
     sold = models.BooleanField(default=False)
-
+ 
     date = models.DateField(verbose_name="Inventory date")
 
 
@@ -97,5 +97,8 @@ class manuf_making(models.Model):
     itemname = itemname = models.CharField(max_length=200)
     quantity = models.IntegerField()
     date_of_production = models.DateField()
-    sold = models.BooleanField(default=False)
+    cleared = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "{}, {}, {} {}".format(self.man_name, self.itemname, self.date_of_production, self.cleared)
 

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from hospital.models import hosp_inv, hosp_req, supp_storage, supp_inv
+from hospital.models import hosp_inv, hosp_req, supp_storage, supp_inv, manuf_making
 import datetime
 import time
 from django.shortcuts import redirect
@@ -21,7 +21,7 @@ supps = [
     'A', 'B', 'E',
 ]
 
-manuf = [
+manufs = [
     'D', 'G',
 ]
 
@@ -387,34 +387,28 @@ def add_manuf(request):
     return redirect("/")
 
 
-def random_manuf_inv():
+def random_manuf_making():
     new_manuf_making= manuf_making()
-    new_manuf_making.manuf_name = random.choice(supps)
-    print(new_supp_inv.supp_name)
-    storage = supp_storage.objects.get(supp_name=new_supp_inv.supp_name)
-    new_supp_inv.itemname = random.choice(drugnames)
-    quantity  = random.randint(10, 100)
-    maxi = storage.maximum-storage.occupied
-    if(maxi == 0):
-        return None
-    while quantity > maxi:
-        quantity  = random.randint(1, maxi)
+    new_manuf_making.man_name = random.choice(manufs)
+    print(new_manuf_making.man_name)
     
-    new_supp_inv.quantity = quantity
+    new_manuf_making.itemname = random.choice(drugnames)
+    quantity  = random.randint(100, 1000)
+    
+    new_manuf_making.cleared = random.choice([True, False])
+    new_manuf_making.quantity = quantity
 
-    new_supp_inv.date = datetime.date.today() - datetime.timedelta(days=random.randint(0,8))
-    return new_supp_inv
+    new_manuf_making.date_of_production = datetime.date.today() + datetime.timedelta(days=random.randint(-8,8))
+    return new_manuf_making
 
-def fill_supp_inv(request):
+def fill_manuf_making(request):
     counts = 0
     for i in range(n_items):
-        new_supp_inv = random_supp_inv()
-        print(new_supp_inv)
+        new_manuf_making = random_manuf_making()
+
         try:
-            new_supp_inv.save()
-            storage = supp_storage.objects.get(supp_name=new_supp_inv.supp_name)
-            storage.occupied += new_supp_inv.quantity
-            storage.save()
+            new_manuf_making.save()
+            
         except Exception:
             print("Triggered")
             count+=1
@@ -422,3 +416,122 @@ def fill_supp_inv(request):
     print("Count ", counts)
 
     return redirect('/')
+
+
+def metric_07_viewpage(request, manuf='D'):
+    """ Look at nearby manufacturers and find the most produced drug. """
+
+    visited = dict()
+    max_depth = 2
+    counts = dict()
+    queue = [manuf]
+    visited[manuf] = 0
+
+    while(len(queue)>0):
+        t = queue[0]
+        queue.pop(0)
+
+        for j in manuf_graph[t]:
+            if visited[t] < max_depth and j not in visited.keys():
+                queue.append(j)
+                visited[j] = visited[t]+1
+    
+    manuf_list = dict()
+    start = time.time()
+
+    for man in visited.keys():
+        objs = manuf_making.objects.filter(man_name=man, cleared=False)
+
+        for obj in objs:
+            if obj.itemname not in counts.keys():
+                counts[obj.itemname] = obj.quantity
+            else:
+                counts[obj.itemname]+=obj.quantity
+
+            if obj.itemname not in manuf_list.keys():
+                manuf_list[obj.itemname] = [man]
+            elif man not in manuf_list[obj.itemname]:
+                manuf_list[obj.itemname].append(man)
+
+    
+    
+
+
+    counts = dict(sorted(counts.items(), key=lambda item: item[1], reverse=True))
+
+    data = []
+
+    for key, value in counts.items():
+        temp = [key, value, manuf_list[key]]
+        data.append(temp)
+    
+    data.sort(key=lambda i: ( -1*i[1], -1*len(i[2]) ))
+    end = time.time()-start
+    print(data)
+
+    return render(request, 'hospital/metric_07.html', context={"data": data, "manuf": manuf, "exectime": end})
+
+
+def metric_08_viewpage(request, hospital='B'):
+    """ Look at nearby hospitals and find the most prescribed drug, that is in least production. """
+
+    visited = dict()
+    max_depth = 2
+    counts = dict()
+    queue = [hospital]
+    visited[hospital] = 0
+
+    while(len(queue)>0):
+        t = queue[0]
+        queue.pop(0)
+
+        for j in graph[t]:
+            if visited[t] < max_depth and j not in visited.keys():
+                queue.append(j)
+                visited[j] = visited[t]+1
+    
+    hosp_list = dict()
+    counts_list = dict()
+    start = time.time()
+    for i in range(8):
+        date = datetime.date.today() - datetime.timedelta(days=i)
+        for hosp in visited.keys():
+            objs = hosp_req.objects.filter(hosp_name=hosp, date=date)
+
+            for obj in objs:
+                if obj.itemname not in counts.keys():
+                    counts[obj.itemname] = obj.quantity
+                else:
+                    counts[obj.itemname]+=obj.quantity
+
+                if obj.itemname not in hosp_list.keys():
+                    hosp_list[obj.itemname] = [hosp]
+                elif hosp not in hosp_list[obj.itemname]:
+                    hosp_list[obj.itemname].append(hosp)
+
+    for name in counts.keys():
+        counts_list[name]=0
+        objs = manuf_making.objects.filter(cleared=False, itemname=name)
+        
+    
+        for obj in objs:
+            counts_list[obj.itemname]+=obj.quantity
+    
+
+
+
+    counts = dict(sorted(counts.items(), key=lambda item: item[1], reverse=True))
+
+    data = []
+
+    for key, value in counts.items():
+        temp = [key, value, hosp_list[key], counts_list[key]]
+        data.append(temp)
+
+    data.sort(key=lambda i: ( i[3]/i[1] ))
+
+    end = time.time()-start
+
+    print(data)
+
+    return render(request, 'hospital/metric_08.html', context={"data": data, "hospital": hospital, "exectime": end})

@@ -24,16 +24,27 @@ def mark_sold(modeladmin, request, queryset):
             obj.sold = True
             obj.save()
 
-
-
 mark_sold.short_description = "Mark items as sold"
 
 class SuppInvAdmin(admin.ModelAdmin):
     list_display = ('supp_name', 'itemname', 'date', 'quantity', 'sold')
     actions=[mark_sold]
 
+
+def mark_cleared(modeladmin, request, queryset):
+    
+    for obj in queryset:
+        if obj.sold == False:
+            obj.cleared = True
+            obj.save()
+
+mark_cleared.short_description = "Mark stock as cleared"
+
 class ManufMakingAdmin(admin.ModelAdmin):
-    list_display=('man_name', 'itemname', 'date_of_production', 'sold')
+    list_display=('man_name', 'itemname', 'date_of_production', 'cleared')
+    actions=[mark_cleared]
+
+
 
 admin.site.register(hosp_inv, HospInvAdmin)
 admin.site.register(hosp_req, HospReqAdmin)
