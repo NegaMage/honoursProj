@@ -41,4 +41,12 @@ urlpatterns = [
 
     path('metric_04/<supplier>/', views.metric_04_viewpage),
     path('metric_04/', views.metric_04_viewpage),
+
+    path('metric_05/<hospital>/', views.metric_05_viewpage),
+    path('metric_05/', views.metric_05_viewpage),
+
+    path('metric_06/<hospital>/', views.metric_06_viewpage),
+    path('metric_06/', views.metric_06_viewpage),
+
+    path('add_manuf_data/', views.add_manuf),
 ]

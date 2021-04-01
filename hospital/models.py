@@ -86,3 +86,16 @@ class supp_inv(models.Model):
     #     storage = supp_storage.objects.get(supp_name=self.supp_name)
     #     storage.occuped -= self.quantity
     #     self.delete()
+
+manuf_names = [
+    ('D', 'D'),
+    ('G', 'G'),
+]
+
+class manuf_making(models.Model):
+    man_name = models.CharField(max_length=10, choices=manuf_names)
+    itemname = itemname = models.CharField(max_length=200)
+    quantity = models.IntegerField()
+    date_of_production = models.DateField()
+    sold = models.BooleanField(default=False)
+

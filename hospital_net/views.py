@@ -21,14 +21,32 @@ supps = [
     'A', 'B', 'E',
 ]
 
+manuf = [
+    'D', 'G',
+]
+
 graph = {
     'A' : ['B', 'F', 'G'],
-    'B' : ['A', 'C'],
-    'C' : ['B', 'D'],
+    'B' : ['A', 'C', 'H'],
+    'C' : ['B', 'D', 'I'],
     'D' : ['C', 'E', 'G'],
     'E' : ['D', 'F'],
     'F' : ['A', 'E', 'G'],
     'G' : ['A', 'D', 'F'],
+    'H' : ['B', 'I'],
+    'I' : ['C', 'H', 'J'],
+    'J' : ['D', 'I'],
+}
+
+supp_graph = {
+    'A' : ['B', 'E'],
+    'B' : ['A'],
+    'E' : ['A'],
+}
+
+manuf_graph = {
+    'D' : ['G'],
+    'G' : ['D'],
 }
 
 drugnames = [
@@ -221,6 +239,8 @@ def metric_04_viewpage(request, supplier = 'E'):
     # Drugs least moved at a supplier
 
     counts = dict()
+    dates = dict()
+    data = []
     objs = supp_inv.objects.filter(sold=True)
     start = time.time()
     
@@ -229,12 +249,176 @@ def metric_04_viewpage(request, supplier = 'E'):
             counts[obj.itemname] = obj.quantity
         else:
             counts[obj.itemname]+=obj.quantity
+        if obj.itemname not in dates.keys():
+            dates[obj.itemname] = obj.date
+        else:
+            dates[obj.itemname] = min(dates[obj.itemname], obj.date)
+    
+    for key, value in counts.items():
+        temp = (key, dates[key], value)
+        data.append(temp)
+    # print(data)
+    # counts = dict(sorted(counts.items(), key=lambda item: item[1]))
+
+    data.sort(key=lambda i: ( i[1], i[2] ))
+    
+
+    end = time.time()-start
+
+
+    
+
+    print(counts)
+
+    return render(request, 'hospital/metric_04.html', context={"data": data, "supplier": supplier, "exectime": end})
+
+
+
+def metric_05_viewpage(request, hospital='B'):
+    """ Look at nearby hospitals and find the most prescribed drug. """
+
+    visited = dict()
+    max_depth = 2
+    counts = dict()
+    queue = [hospital]
+    visited[hospital] = 0
+
+    while(len(queue)>0):
+        t = queue[0]
+        queue.pop(0)
+
+        for j in graph[t]:
+            if visited[t] < max_depth and j not in visited.keys():
+                queue.append(j)
+                visited[j] = visited[t]+1
+    
+    hosp_list = dict()
+    start = time.time()
+    for i in range(8):
+        date = datetime.date.today() - datetime.timedelta(days=i)
+        for hosp in visited.keys():
+            objs = hosp_req.objects.filter(hosp_name=hosp, date=date)
+
+            for obj in objs:
+                if obj.itemname not in counts.keys():
+                    counts[obj.itemname] = obj.quantity
+                else:
+                    counts[obj.itemname]+=obj.quantity
+
+                if obj.itemname not in hosp_list.keys():
+                    hosp_list[obj.itemname] = [hosp]
+                elif hosp not in hospt_list[obj.itemname]:
+                    hosp_list[obj.itemname].append(hosp)
+
     
     end = time.time()-start
 
 
-    counts = dict(sorted(counts.items(), key=lambda item: item[1]))
+    counts = dict(sorted(counts.items(), key=lambda item: item[1], reverse=True))
 
-    print(counts)
+    data = []
 
-    return render(request, 'hospital/metric_04.html', context={"objs": counts, "supplier": supplier, "exectime": end})
+    for key, value in counts.items():
+        temp = [key, value, hosp_list[key]]
+        data.append(temp)
+
+    print(data)
+
+    return render(request, 'hospital/metric_05.html', context={"data": data, "hospital": hospital, "exectime": end})
+
+
+def metric_06_viewpage(request, supplier='B'):
+    """ Look at nearby suppliers and find the most stocked drug. """
+
+    visited = dict()
+    max_depth = 2
+    counts = dict()
+    queue = [supplier]
+    visited[supplier] = 0
+
+    while(len(queue)>0):
+        t = queue[0]
+        queue.pop(0)
+
+        for j in supp_graph[t]:
+            if visited[t] < max_depth and j not in visited.keys():
+                queue.append(j)
+                visited[j] = visited[t]+1
+    
+    supp_list = dict()
+    start = time.time()
+
+    for supp in visited.keys():
+        objs = supp_inv.objects.filter(supp_name=supp, sold=False)
+
+        for obj in objs:
+            if obj.itemname not in counts.keys():
+                counts[obj.itemname] = obj.quantity
+            else:
+                counts[obj.itemname]+=obj.quantity
+
+            if obj.itemname not in supp_list.keys():
+                supp_list[obj.itemname] = [supp]
+            elif supp not in supp_list[obj.itemname]:
+                supp_list[obj.itemname].append(supp)
+
+    
+    end = time.time()-start
+
+
+    counts = dict(sorted(counts.items(), key=lambda item: item[1], reverse=True))
+
+    data = []
+
+    for key, value in counts.items():
+        temp = [key, value, supp_list[key]]
+        data.append(temp)
+    
+    data.sort(key=lambda i: ( -1*i[1], -1*len(i[2]) ))
+
+    print(data)
+
+    return render(request, 'hospital/metric_06.html', context={"data": data, "supplier": supplier, "exectime": end})
+
+
+
+def add_manuf(request):
+    
+    return redirect("/")
+
+
+def random_manuf_inv():
+    new_manuf_making= manuf_making()
+    new_manuf_making.manuf_name = random.choice(supps)
+    print(new_supp_inv.supp_name)
+    storage = supp_storage.objects.get(supp_name=new_supp_inv.supp_name)
+    new_supp_inv.itemname = random.choice(drugnames)
+    quantity  = random.randint(10, 100)
+    maxi = storage.maximum-storage.occupied
+    if(maxi == 0):
+        return None
+    while quantity > maxi:
+        quantity  = random.randint(1, maxi)
+    
+    new_supp_inv.quantity = quantity
+
+    new_supp_inv.date = datetime.date.today() - datetime.timedelta(days=random.randint(0,8))
+    return new_supp_inv
+
+def fill_supp_inv(request):
+    counts = 0
+    for i in range(n_items):
+        new_supp_inv = random_supp_inv()
+        print(new_supp_inv)
+        try:
+            new_supp_inv.save()
+            storage = supp_storage.objects.get(supp_name=new_supp_inv.supp_name)
+            storage.occupied += new_supp_inv.quantity
+            storage.save()
+        except Exception:
+            print("Triggered")
+            count+=1
+            pass
+    print("Count ", counts)
+
+    return redirect('/')

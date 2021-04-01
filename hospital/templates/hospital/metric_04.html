@@ -2,8 +2,14 @@
 
 {% block content %}
     <h1 class="display-2">
-        Metric 04s : Drugs least moved Supplier {{supplier}}
+        Metric 04s: Drugs least moved at Supplier {{supplier}}
     </h1>
+
+    <h2>
+    This metric looks at drugs least circulated by the supplier. An easy way to produce this metric is to look at all the drugs in stock at a supplier, and see which ones have been there the longest, and in largest amounts. 
+    </h2>
+    <br>
+
     <h2>
     This is an output, generated from our stored tables at Supplier {{supplier}}. This metric is easy to summarise at each node. It's just going through each entry at the local inventory table, from the past week, and summarising data. 
     </h2>
@@ -13,15 +19,17 @@
         <thead>
             <tr>
                 <th scope="col">Item name</th>
+                <th scope="col">Earliest purchase date</th>
                 <th scope="col">Count</th>
             </tr>
         </thead>
         <tbody>
-        {% for key,value in objs.items %}
+        {% for key,date,count in data %}
 
             <tr>
                 <td>{{ key }}</td>
-                <td>{{ value }}</td>
+                <td>{{ date }}</td>
+                <td>{{ count }}</td>
             </tr>
         {% endfor %}    
         </tbody>

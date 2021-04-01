@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import hosp_inv, hosp_req, supp_storage, supp_inv
-# , hosp_emp
+from .models import hosp_inv, hosp_req, supp_storage, supp_inv, manuf_making
 
 
 
@@ -33,7 +32,11 @@ class SuppInvAdmin(admin.ModelAdmin):
     list_display = ('supp_name', 'itemname', 'date', 'quantity', 'sold')
     actions=[mark_sold]
 
+class ManufMakingAdmin(admin.ModelAdmin):
+    list_display=('man_name', 'itemname', 'date_of_production', 'sold')
+
 admin.site.register(hosp_inv, HospInvAdmin)
 admin.site.register(hosp_req, HospReqAdmin)
 admin.site.register(supp_storage, SuppStorAdmin)
 admin.site.register(supp_inv, SuppInvAdmin)
+admin.site.register(manuf_making, ManufMakingAdmin)
