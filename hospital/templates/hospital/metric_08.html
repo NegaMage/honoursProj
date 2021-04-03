@@ -5,7 +5,7 @@
         Metric 08: Most Drugs sold at Hospital {{hospital}}, sorted by least production
     </h1>
     <h2>
-    This metric is generated at each hospital. We go through their prescriptions, and find the drugs prescribed the least. This information can be used by suppliers to prioritise profits, and by manufacturers when considering effective production strategies.
+    This metric is very useful, but requires multiple searches through databases to generate. First, all hospitals adjacent to hospital {{hospital}} are queried, and their net prescriptions from the last week are fetched. Then, manufacturers are queried for their latest uncleared production lines, and this net output is compared against the net requirements from nearby hospital/base.html
     </h2> 
     <br>
     <h2>
@@ -41,5 +41,7 @@
     <hr>
 
     Total time to execute: {{exectime}} seconds
+    <br>
+    Total time to execute in parallel system: {{paralleltime}} seconds
     
 {% endblock content %}

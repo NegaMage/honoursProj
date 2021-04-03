@@ -294,9 +294,14 @@ def metric_05_viewpage(request, hospital='B'):
     
     hosp_list = dict()
     start = time.time()
+
+    time_counts = dict()
+
     for i in range(8):
         date = datetime.date.today() - datetime.timedelta(days=i)
+        
         for hosp in visited.keys():
+            t1 = time.time()
             objs = hosp_req.objects.filter(hosp_name=hosp, date=date)
 
             for obj in objs:
@@ -307,11 +312,34 @@ def metric_05_viewpage(request, hospital='B'):
 
                 if obj.itemname not in hosp_list.keys():
                     hosp_list[obj.itemname] = [hosp]
-                elif hosp not in hospt_list[obj.itemname]:
+                elif hosp not in hosp_list[obj.itemname]:
                     hosp_list[obj.itemname].append(hosp)
+            
+            t2 = time.time()-t1
+            # print(t2)
+            if hosp not in time_counts.keys():
+                time_counts[hosp]=t2
+            else:
+                time_counts[hosp]+=t2
+            
 
+
+        
     
     end = time.time()-start
+    results = dict()
+    for i in range(3):
+        results[i]=end
+    
+    for hosp in visited.keys():
+        results[visited[hosp]] = min(results[visited[hosp]], time_counts[hosp])
+    
+    print("TOTAL TIME = ")
+    x = 0
+    for i in range(3):
+        x+=results[i]
+    print(x, "seconds")
+    print("Expected = ", end)
 
 
     counts = dict(sorted(counts.items(), key=lambda item: item[1], reverse=True))
@@ -324,7 +352,7 @@ def metric_05_viewpage(request, hospital='B'):
 
     print(data)
 
-    return render(request, 'hospital/metric_05.html', context={"data": data, "hospital": hospital, "exectime": end})
+    return render(request, 'hospital/metric_05.html', context={"data": data, "hospital": hospital, "exectime": end, "paralleltime": x})
 
 
 def metric_06_viewpage(request, supplier='B'):
@@ -347,8 +375,10 @@ def metric_06_viewpage(request, supplier='B'):
     
     supp_list = dict()
     start = time.time()
+    time_counts = dict()
 
     for supp in visited.keys():
+        t1 = time.time()
         objs = supp_inv.objects.filter(supp_name=supp, sold=False)
 
         for obj in objs:
@@ -361,10 +391,23 @@ def metric_06_viewpage(request, supplier='B'):
                 supp_list[obj.itemname] = [supp]
             elif supp not in supp_list[obj.itemname]:
                 supp_list[obj.itemname].append(supp)
+        
+        t2 = time.time() - t1
+        time_counts[supp] = t2
 
     
+    
     end = time.time()-start
+    timers = dict()
+    for i in range(3):
+        timers[i]=end
+    
+    for supp in visited.keys():
+        timers[visited[supp]] = min(timers[visited[supp]], time_counts[supp])
 
+    x = 0;
+    for i in range(3):
+        x+=timers[i]
 
     counts = dict(sorted(counts.items(), key=lambda item: item[1], reverse=True))
 
@@ -377,8 +420,9 @@ def metric_06_viewpage(request, supplier='B'):
     data.sort(key=lambda i: ( -1*i[1], -1*len(i[2]) ))
 
     print(data)
-
-    return render(request, 'hospital/metric_06.html', context={"data": data, "supplier": supplier, "exectime": end})
+    print(x)
+    print(end)
+    return render(request, 'hospital/metric_06.html', context={"data": data, "supplier": supplier, "exectime": end, "paralleltime": x})
 
 
 
@@ -492,10 +536,15 @@ def metric_08_viewpage(request, hospital='B'):
     
     hosp_list = dict()
     counts_list = dict()
+
+    time_counts = dict()
+
     start = time.time()
+    
     for i in range(8):
         date = datetime.date.today() - datetime.timedelta(days=i)
         for hosp in visited.keys():
+            t1 = time.time()
             objs = hosp_req.objects.filter(hosp_name=hosp, date=date)
 
             for obj in objs:
@@ -508,6 +557,12 @@ def metric_08_viewpage(request, hospital='B'):
                     hosp_list[obj.itemname] = [hosp]
                 elif hosp not in hosp_list[obj.itemname]:
                     hosp_list[obj.itemname].append(hosp)
+            
+            t2 = time.time()-t1
+            if hosp not in time_counts.keys():
+                time_counts[hosp]=t2
+            else:
+                time_counts[hosp]+=t2
 
     for name in counts.keys():
         counts_list[name]=0
@@ -517,7 +572,7 @@ def metric_08_viewpage(request, hospital='B'):
         for obj in objs:
             counts_list[obj.itemname]+=obj.quantity
     
-
+    
 
 
     counts = dict(sorted(counts.items(), key=lambda item: item[1], reverse=True))
@@ -531,7 +586,19 @@ def metric_08_viewpage(request, hospital='B'):
     data.sort(key=lambda i: ( i[3]/i[1] ))
 
     end = time.time()-start
-
+    results = dict()
+    for i in range(3):
+        results[i]=end
+    
+    for hosp in visited.keys():
+        results[visited[hosp]] = min(results[visited[hosp]], time_counts[hosp])
+    
+    print("TOTAL TIME = ")
+    x = 0
+    for i in range(3):
+        x+=results[i]
+    print(x, "seconds")
+    print("Expected = ", end)
     print(data)
 
-    return render(request, 'hospital/metric_08.html', context={"data": data, "hospital": hospital, "exectime": end})
+    return render(request, 'hospital/metric_08.html', context={"data": data, "hospital": hospital, "exectime": end, "paralleltime": x})
