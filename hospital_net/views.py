@@ -128,7 +128,9 @@ def metric_01_viewpage(request, hospital='A'):
     for i in range(8):
         date = datetime.date.today() - datetime.timedelta(days=i)
         objs = hosp_req.objects.filter(hosp_name=hospital, date=date)
-
+        print(hospital)
+        print(date)
+        print(objs)
         for obj in objs:
             if obj.itemname not in counts.keys():
                 counts[obj.itemname] = obj.quantity

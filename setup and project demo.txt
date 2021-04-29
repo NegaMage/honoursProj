@@ -1,0 +1,91 @@
+Submitted by Feyaz Baker, 181CO119 as part of course requirements for DDM - Honours Course. This code is hosted at `https://github.com/NegaMage/honoursProj`
+
+==========================================
+Instructions to run on Linux/WSL:
+==========================================
+
+Run the following commands on a terminal in this folder:
+
+1. `cd honoursProj`
+
+2. `sudo pip3 install django numpy`
+
+(Optional) `python3 manage.py makesuperuser`, then follow the prompts to make a superuser account. There's a default account in the database, with username 'feyaz' and password 'password'.
+
+3. `python3 manage.py runserver` will start the server on your localhost.
+
+============================================
+DEMOS
+============================================
+Remember to restart the server (stop the terminal running the `python3 manage.py runserver`, and restart that command) if you make changes to any files. 
+
+Each demo will detail some instructions to be followed, where those instructions will produce changes, and how to view them. Where applicable, I've also stated what to infer from these. In most cases, the inference comes from the method of generating each metric, so do check the `honoursProj/hospital_net/views.py` file if something seems off.
+
+
+DEMO: To view the project
+-------------------------
+Navigate to `http://localhost:8000/` on your web browser. You've reached the first page anyone sees when they open up the project.
+
+The navbar at the top has some handy helper functions. We shall explore them in the rest of the demo. The navbar won't show up if the screen is too narrow, so best open in full screen.
+
+The eight metrics implemented are also accessible from the navbar.
+
+
+DEMO: Interacting with the project
+----------------------------------
+To add a new hospital/supplier/manufacturer in a city, we have to edit the corresponding lines in `honoursProj/hospital/models.py`. The lines to edit will be dictionaries with the names `hospital_names`, `supplier_names`, and `manuf_names` respectively. Just add whatever name you'd like, in the same format as the other elements. Once we've edited the lists of hospitals/suppliers/manufacturers to our satisfaction, proceed to the next part. 
+
+Note: If you're adding a new supplier, you also have to make note of the corresponding maximum capacity in the `supp_storage` table. 
+
+
+DEMO: Adding data to the models
+-------------------------------
+Now that we've edited the models to successfully reflect the addition of a new hospital/supplier/manufacturer, we can populate the tables corresponding to that entity. On the navbar, click on the Admin Page link, and enter the login details from before. The default login is 'feyaz', 'password'. 
+
+This is the Django Admin page, and it makes our work easier. Each table stores information as detailed in the documents, so we won't revisit that here. As a user, we will only be concerned with the tables under the Hospital Column. Keep in mind that this name 'HOSPITAL' only reflects the name of the project, and it doesn't really matter what name we give it. 
+
+There'll be buttons to add in form data manually on the top right of every table. The db.sqlite3 file in the folder already has some randomly generated data, so it should be okay to view. 
+
+Also, if you click on the column name of any table, you can sort data by that column. That's useful if you want to see by counts, and grouped by entities, etc.
+
+
+DEMO: Clean Hospital Inventory
+------------------------------
+This helper function clears the hospital inventory, essentially summarising the quantity and stamping the prescription with a date so we can store it as a condensed record. These records are stored in hosp_req, because these were the net requirements for drugs at that hospital.
+
+
+DEMO: Fill Hospital Inventory with Random Data
+----------------------------------------------
+Try running the helper function from the home menu, and you can see the tables in hosp_inv get filled with randomly generated data for each hospital. This data will get eliminated when running the clean hospital inventory function, by design. 
+
+
+DEMO: Fill Supplier Inventory with Random Data
+----------------------------------------------
+Suppliers keep a lot of stock, but not more than their capacity. This helper function will randomly make purchases that may or may not be cleared yet. If you go to the `supp_inv` page from the admin page, you can also select a bunch of stocks that haven't been cleared, and clear them with the action button near the top of the page.
+
+
+DEMO: Reset Supplier Storages
+-----------------------------
+Smaller helper function, I kept running into trouble with the supplier inventory and supplier storage logic, so I made a function to force clear all the storages, without marking the stock as sold. It's just a novelty.
+
+
+DEMO: Add new drugs to manufacturing
+------------------------------------
+Randomly makes new drugs that can be added to manufacturing. These additions will show up on `manuf_making`. 
+
+
+DEMO: Every metric on the project
+---------------------------------
+You can see the metrics get generated in `honoursProj/hospital_net/views.py`. Notice how every query fetch is done sequentially in terms of the entities first, to better simulate the delays of fetching across different databases. Also, if you run the random data generating helper function six or seven times, you can easily find differences across the outputs of each metric. 
+
+
+WHAT TO CONCLUDE FROM THE PROJECT
+---------------------------------
+We've made a good demo for how distributed systems can be used to help people. I strongly believe this project, or at least a version of it, would greatly streamline systemic and organisational change in the medical system. It's expandable, robust, and bare-bones enough that it can be modified at the user's requirements. Emphasis was put on making it durable as possible, and it has some nice input authentication at the data model stage itself (check `honoursProj/hospital/models.py`). I've tried to cover everything my demo has in this txt file, but the real demo will have more explanations and a more interactive medium.
+
+
+CLOSING REMARKS:
+----------------
+I had generated a large amount of data while testing, but in the interest of keeping the db.sqlite3 file small enough to demo, I've started over with a smaller number of records.
+
+There's a markdown file inside that can be read with a normal notepad reader, it details more of the work done, as well as some future work that can be done.
